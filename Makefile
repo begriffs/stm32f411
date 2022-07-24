@@ -24,17 +24,17 @@ blink.axf blink.bin : blink.c rtos/libfreertos.a
 	$(CC) $(CFLAGS) blink.c $(LDFLAGS) -o blink.axf $(LDLIBS)
 	$(OBJCOPY) -O binary blink.axf blink.bin
 
+#### Build FreeRTOS customized for our app config and target MCU
+
+## TODO: is there a non-GNU way to simplify the repetition?
+
 rtos/libfreertos.a : rtos/tasks.o rtos/port.o rtos/list.o rtos/heap.o
 	$(AR) r $@ $?
-
 rtos/tasks.o : $(RTOS)/tasks.c rtos/FreeRTOSConfig.h
 	$(CC) $(CFLAGS) -o $@ -c $(RTOS)/tasks.c
-
-rtos/port.o : $(RTOS)/portable/GCC/ARM_CM3/port.c
-	$(CC) $(CFLAGS) -o $@ -c $?
-
-rtos/list.o : $(RTOS)/list.c
-	$(CC) $(CFLAGS) -o $@ -c $?
-
-rtos/heap.o : $(RTOS)/portable/MemMang/heap_4.c
-	$(CC) $(CFLAGS) -o $@ -c $?
+rtos/list.o : $(RTOS)/list.c rtos/FreeRTOSConfig.h
+	$(CC) $(CFLAGS) -o $@ -c $(RTOS)/list.c
+rtos/port.o : $(RTOS)/portable/GCC/ARM_CM3/port.c rtos/FreeRTOSConfig.h
+	$(CC) $(CFLAGS) -o $@ -c $(RTOS)/portable/GCC/ARM_CM3/port.c
+rtos/heap.o : $(RTOS)/portable/MemMang/heap_4.c rtos/FreeRTOSConfig.h
+	$(CC) $(CFLAGS) -o $@ -c $(RTOS)/portable/MemMang/heap_4.c
