@@ -24,6 +24,9 @@ blink.axf blink.bin : blink.c rtos/libfreertos.a
 	$(CC) $(CFLAGS) blink.c $(LDFLAGS) -o blink.axf $(LDLIBS)
 	$(OBJCOPY) -O binary blink.axf blink.bin
 
+flash : blink.bin
+	doas openocd -f jlink-bluepill.cfg -c "program blink.bin 0x8000000 exit"
+
 #### Build FreeRTOS customized for our app config and target MCU
 
 ## TODO: is there a non-GNU way to simplify the repetition?
