@@ -11,21 +11,36 @@ RTOS = /usr/local/freertos-202012.04
 INC_RTOS = -I./rtos -I$(RTOS)/include -I$(RTOS)/portable/GCC/ARM_CM3
 INC_OPENCM3 = -DSTM32F1 -I$(OPENCM3)/include
 
-STMF103 = -mcpu=cortex-m3 -mthumb -mno-thumb-interwork -mfpu=vfp \
-          -msoft-float -mfix-cortex-m3-ldrd
+STMF103 = -mcpu=cortex-m3 -mthumb -nostartfiles
 
 CFLAGS = -std=c99 -pedantic -Wall -Wextra -Wshadow \
          -g -Os $(STMF103) $(INC_RTOS) $(INC_OPENCM3)
 
-LDFLAGS = -Lrtos -L$(OPENCM3)/lib -Tbluepill.ld -static -nostartfiles
+LDFLAGS = -Lrtos -L$(OPENCM3)/lib -Tbluepill.ld
 LDLIBS = -lopencm3_stm32f1 -lfreertos
 
-blink.axf blink.bin : blink.c rtos/libfreertos.a
+blink.axf blink.bin : blink.c rtos/libfreertos.a bluepill.ld
 	$(CC) $(CFLAGS) blink.c $(LDFLAGS) -o blink.axf $(LDLIBS)
 	$(OBJCOPY) -O binary blink.axf blink.bin
 
+metal.axf metal.bin : metal.c bluepill.ld
+	$(CC) $(CFLAGS) metal.c $(LDFLAGS) -o metal.axf
+	$(OBJCOPY) -O binary metal.axf metal.bin
+
+nop.axf nop.bin : nop.c bluepill.ld
+	$(CC) $(CFLAGS) nop.c $(LDFLAGS) -o nop.axf $(LDLIBS)
+	$(OBJCOPY) -O binary nop.axf nop.bin
+
+miniblink.axf miniblink.bin : miniblink.c bluepill.ld
+	$(CC) $(CFLAGS) fault_dbg.o miniblink.c $(LDFLAGS) -o miniblink.axf $(LDLIBS)
+	$(OBJCOPY) -O binary miniblink.axf miniblink.bin
+
 flash : blink.bin
 	doas openocd -f jlink-bluepill.cfg -c "program blink.bin 0x8000000 exit"
+
+clean :
+	rm -f *.axf *.bin
+	rm -f rtos/*.[ao]
 
 #### Build FreeRTOS customized for our app config and target MCU
 
