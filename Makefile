@@ -17,10 +17,10 @@ CFLAGS = -std=c99 -pedantic -Wall -Wextra -Wshadow \
          -g -Os $(STMF103) $(INC_RTOS) $(INC_OPENCM3)
 
 LDFLAGS = -Lrtos -L$(OPENCM3)/lib -Tblackpill.ld
-LDLIBS = -lopencm3_stm32f4 -lfreertos
+LDLIBS = -lopencm3_stm32f4
 
 blink.axf blink.bin : blink.c rtos/libfreertos.a blackpill.ld
-	$(CC) $(CFLAGS) blink.c $(LDFLAGS) -o blink.axf $(LDLIBS)
+	$(CC) $(CFLAGS) blink.c $(LDFLAGS) -o blink.axf $(LDLIBS) -lfreertos
 	$(OBJCOPY) -O binary blink.axf blink.bin
 
 miniblink.axf miniblink.bin : miniblink.c blackpill.ld
