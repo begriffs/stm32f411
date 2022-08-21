@@ -26,8 +26,11 @@ gpio_setup(void) {
 	rcc_periph_clock_enable(RCC_GPIOC);
 
 	/* Set GPIO8 (in GPIO port C) to 'output push-pull'. */
-	gpio_set_mode(GPIOC,GPIO_MODE_OUTPUT_2_MHZ,
-		      GPIO_CNF_OUTPUT_PUSHPULL,GPIO13);
+	gpio_mode_setup(
+		GPIOC,
+		GPIO_MODE_OUTPUT,
+		GPIO_PUPD_NONE,
+		GPIO13);
 }
 
 int
