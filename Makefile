@@ -27,10 +27,6 @@ miniblink.axf miniblink.bin : miniblink.c blackpill.ld
 	$(CC) $(CFLAGS) miniblink.c $(LDFLAGS) -o miniblink.axf $(LDLIBS)
 	$(OBJCOPY) -O binary miniblink.axf miniblink.bin
 
-
-flash : blink.bin
-	doas openocd -f jlink-blackpill.cfg -c "program blink.bin 0x8000000 exit"
-
 clean :
 	rm -f *.axf *.bin
 	rm -f rtos/*.[ao]
