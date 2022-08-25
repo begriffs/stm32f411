@@ -19,7 +19,7 @@
 
 // the device has 128k of SRAM, and I don't know how much the kernel
 // uses, so let's just say 64k for now
-#define configTOTAL_HEAP_SIZE           (1u<<6)
+#define configTOTAL_HEAP_SIZE           (64 * 1024)
 
 #define configUSE_PREEMPTION            1
 #define configUSE_IDLE_HOOK             0
