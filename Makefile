@@ -7,8 +7,9 @@ OBJCOPY = $(ABI)-objcopy
 
 OPENCM3 = /usr/local/libopencm3-1.0.0
 RTOS = /usr/local/freertos-202012.04
+RTOS_PORT = $(RTOS)/portable/GCC/ARM_CM4F
 
-INC_RTOS = -I./rtos -I$(RTOS)/include -I$(RTOS)/portable/GCC/ARM_CM4F
+INC_RTOS = -I./rtos -I$(RTOS)/include -I$(RTOS_PORT)
 INC_OPENCM3 = -DSTM32F4 -I$(OPENCM3)/include
 
 STMF103 = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -nostartfiles
@@ -41,7 +42,7 @@ rtos/tasks.o : $(RTOS)/tasks.c rtos/FreeRTOSConfig.h
 	$(CC) $(CFLAGS) -o $@ -c $(RTOS)/tasks.c
 rtos/list.o : $(RTOS)/list.c rtos/FreeRTOSConfig.h
 	$(CC) $(CFLAGS) -o $@ -c $(RTOS)/list.c
-rtos/port.o : $(RTOS)/portable/GCC/ARM_CM4F/port.c rtos/FreeRTOSConfig.h
-	$(CC) $(CFLAGS) -o $@ -c $(RTOS)/portable/GCC/ARM_CM3/port.c
+rtos/port.o : $(RTOS_PORT)/port.c rtos/FreeRTOSConfig.h
+	$(CC) $(CFLAGS) -o $@ -c $(RTOS_PORT)/port.c
 rtos/heap.o : $(RTOS)/portable/MemMang/heap_4.c rtos/FreeRTOSConfig.h
 	$(CC) $(CFLAGS) -o $@ -c $(RTOS)/portable/MemMang/heap_4.c

@@ -19,7 +19,7 @@ static void blink(void *args)
 	while (1)
 	{
 		gpio_toggle(GPIOC, GPIO13);
-		vTaskDelay(pdMS_TO_TICKS(500));
+		vTaskDelay(pdMS_TO_TICKS(100));
 	}
 }
 

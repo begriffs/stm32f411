@@ -1,52 +1,81 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
-/*-----------------------------------------------------------
- * Application specific definitions.
- *----------------------------------------------------------*/
+#ifndef NDEBUG
+	// turn assertion failures into uninterrupted loops that we can pause
+	// and look at in the debugger
+	#define configASSERT( x ) if( ( x ) == 0 ) { taskDISABLE_INTERRUPTS(); for(;;); }
+
+	// sounds nice
+	#define configCHECK_FOR_STACK_OVERFLOW  1
+#endif
+
+// we use this to delay blinks
+#define INCLUDE_vTaskDelay              1
+
+// IDK, but copied from most similar demo, CORTEX_M4F_STM32F407ZG-SK.
+// Many other demos use 128, so should be safe.
+#define configMINIMAL_STACK_SIZE        130
+
+// the device has 128k of SRAM, and I don't know how much the kernel
+// uses, so let's just say 64k for now
+#define configTOTAL_HEAP_SIZE           (1u<<6)
 
 #define configUSE_PREEMPTION            1
 #define configUSE_IDLE_HOOK             0
 #define configUSE_TICK_HOOK             0
-#define configCPU_CLOCK_HZ              ( ( unsigned long ) 100000000 )    
-#define configSYSTICK_CLOCK_HZ          ( configCPU_CLOCK_HZ / 8 )
-#define configTICK_RATE_HZ              ( ( TickType_t ) 1000 )
-#define configMAX_PRIORITIES            ( 5 )
-#define configMINIMAL_STACK_SIZE        ( ( unsigned short ) 128 )
-#define configTOTAL_HEAP_SIZE           ( ( size_t ) ( 17 * 1024 ) )
-#define configMAX_TASK_NAME_LEN         ( 16 )
-#define configUSE_TRACE_FACILITY        0
+
+// up to us to clock the chip to match using libopencm3
+#define configCPU_CLOCK_HZ              1e8
+
+// Up to us, not mandated by the device. Sets the smallest granularity
+// of time that pdMS_TO_TICKS can specify. Need at least 1khz to get
+// single-ms control
+#define configTICK_RATE_HZ              1e3
+
+// we're not on a restrictive 8- or 16-bit chip
 #define configUSE_16_BIT_TICKS          0
-#define configIDLE_SHOULD_YIELD         1
-#define configUSE_MUTEXES               0
-#define configCHECK_FOR_STACK_OVERFLOW  1
 
-/* Co-routine definitions. */
-#define configUSE_CO_ROUTINES           0
-#define configMAX_CO_ROUTINE_PRIORITIES ( 2 )
+// Tasks can be assigned a priority from zero, which is the lowest priority, to
+// (configMAX_PRIORITIES – 1). Better use 5 because of the Cortex M priorities
+// mentioned at the end of this file.
+#define configMAX_PRIORITIES            5
 
-/* Set the following definitions to 1 to include the API function, or zero
-to exclude the API function. */
+// For user-defined descriptive task names. Pulled 16 from an example, and
+// seems fine.
+#define configMAX_TASK_NAME_LEN         16
 
-#define INCLUDE_vTaskPrioritySet        0
-#define INCLUDE_uxTaskPriorityGet       0
-#define INCLUDE_vTaskDelete             0
-#define INCLUDE_vTaskCleanUpResources   0
-#define INCLUDE_vTaskSuspend            0
-#define INCLUDE_vTaskDelayUntil         0
-#define INCLUDE_vTaskDelay              1
+/******* Cortex-M specific magic ********/
 
-/* This is the raw value as per the Cortex-M3 NVIC.  Values can be 255
-(lowest) to 0 (1?) (highest). */
-#define configKERNEL_INTERRUPT_PRIORITY 255
+#ifdef __NVIC_PRIO_BITS
+    /* __BVIC_PRIO_BITS will be specified when CMSIS is being used. */
+    #define configPRIO_BITS             __NVIC_PRIO_BITS
+#else
+    #define configPRIO_BITS             4        /* 15 priority levels */
+#endif
+
+/* The lowest interrupt priority that can be used in a call to a "set priority"
+ * function. */
+#define configLIBRARY_LOWEST_INTERRUPT_PRIORITY         0xf
+
+/* The highest interrupt priority that can be used by any interrupt service
+ * routine that makes calls to interrupt safe FreeRTOS API functions.  DO NOT CALL
+ * INTERRUPT SAFE FREERTOS API FUNCTIONS FROM ANY INTERRUPT THAT HAS A HIGHER
+ * PRIORITY THAN THIS! (higher priorities are lower numeric values. */
+#define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY    5
+
+/* Interrupt priorities used by the kernel port layer itself.  These are generic
+ * to all Cortex-M ports, and do not rely on any particular library functions. */
+#define configKERNEL_INTERRUPT_PRIORITY         ( configLIBRARY_LOWEST_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
 /* !!!! configMAX_SYSCALL_INTERRUPT_PRIORITY must not be set to zero !!!!
-See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html. */
-#define configMAX_SYSCALL_INTERRUPT_PRIORITY 191 /* equivalent to 0xb0, or priority 11. */
+ * See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html. */
+#define configMAX_SYSCALL_INTERRUPT_PRIORITY    ( configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
 
-/* This is the value being used as per the ST library which permits 16
-priority values, 0 to 15.  This must correspond to the
-configKERNEL_INTERRUPT_PRIORITY setting.  Here 15 corresponds to the lowest
-NVIC value of 255. */
-#define configLIBRARY_KERNEL_INTERRUPT_PRIORITY	15
+/* Definitions that map the FreeRTOS port interrupt handlers to their CMSIS
+ * standard names. */
+#define vPortSVCHandler SVC_Handler
+#define xPortPendSVHandler PendSV_Handler
+#define xPortSysTickHandler SysTick_Handler
+
 
 #endif
