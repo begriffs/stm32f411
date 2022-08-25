@@ -10,18 +10,23 @@ RTOS = /usr/local/freertos-202012.04
 RTOS_PORT = $(RTOS)/portable/GCC/ARM_CM4F
 
 INC_RTOS = -I./rtos -I$(RTOS)/include -I$(RTOS_PORT)
-INC_OPENCM3 = -DSTM32F4 -I$(OPENCM3)/include
+INC_OPENCM3 = -I$(OPENCM3)/include
 
-STMF103 = -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -nostartfiles
+# copy floating point flags from stm32/f4 in libopencm3 makefile
+FP_FLAGS = -mfloat-abi=hard -mfpu=fpv4-sp-d16
+
+STMF411 = -mcpu=cortex-m4 -mthumb $(FP_FLAGS) -DSTM32F4
 
 CFLAGS = -std=c99 -pedantic -Wall -Wextra -Wshadow \
-         -g -Os $(STMF103) $(INC_RTOS) $(INC_OPENCM3)
+         -g -Os $(STMF411) $(INC_RTOS) $(INC_OPENCM3)
 
-LDFLAGS = -Lrtos -L$(OPENCM3)/lib -Tblackpill.ld
-LDLIBS = -lopencm3_stm32f4
+LDFLAGS = -Lrtos -L$(OPENCM3)/lib -L/usr/local/arm-none-eabi/lib/fpu \
+		  -nostartfiles -nostdlib \
+		  -Tblackpill.ld
+LDLIBS = -lopencm3_stm32f4 -lfreertos -lg
 
 blink.axf blink.bin : blink.c rtos/libfreertos.a blackpill.ld
-	$(CC) $(CFLAGS) blink.c $(LDFLAGS) -o blink.axf $(LDLIBS) -lfreertos
+	$(CC) $(CFLAGS) blink.c $(LDFLAGS) -o blink.axf $(LDLIBS)
 	$(OBJCOPY) -O binary blink.axf blink.bin
 
 miniblink.axf miniblink.bin : miniblink.c blackpill.ld
