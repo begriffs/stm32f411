@@ -45,7 +45,12 @@
 // seems fine.
 #define configMAX_TASK_NAME_LEN         16
 
-/******* Cortex-M specific magic ********/
+/********* Cortex-M specific magic **********
+ *
+ * As advised by question 1 in
+ * https://www.freertos.org/FAQHelp.html#faq
+ *
+ ********************************************/
 
 #ifdef __NVIC_PRIO_BITS
     /* __BVIC_PRIO_BITS will be specified when CMSIS is being used. */
@@ -71,11 +76,11 @@
  * See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html. */
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY    ( configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
 
-/* Definitions that map the FreeRTOS port interrupt handlers to their CMSIS
- * standard names. */
-#define vPortSVCHandler SVC_Handler
-#define xPortPendSVHandler PendSV_Handler
-#define xPortSysTickHandler SysTick_Handler
+/* Definitions that map the FreeRTOS port interrupt handlers to their
+ * libopencm3 names */
+#define vPortSVCHandler sv_call_handler
+#define xPortPendSVHandler pend_sv_handler
+#define xPortSysTickHandler sys_tick_handler
 
 
 #endif
