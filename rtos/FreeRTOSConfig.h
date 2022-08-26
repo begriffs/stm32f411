@@ -26,7 +26,7 @@
 #define configUSE_TICK_HOOK             0
 
 // up to us to clock the chip to match using libopencm3
-#define configCPU_CLOCK_HZ              1e8
+#define configCPU_CLOCK_HZ              96000000
 
 // Up to us, not mandated by the device. Sets the smallest granularity
 // of time that pdMS_TO_TICKS can specify. Need at least 1khz to get

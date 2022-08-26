@@ -19,12 +19,14 @@ static void blink(void *args)
 	while (1)
 	{
 		gpio_toggle(GPIOC, GPIO13);
-		vTaskDelay(pdMS_TO_TICKS(100));
+		vTaskDelay(pdMS_TO_TICKS(500));
 	}
 }
 
 int main(void)
 {
+	rcc_clock_setup_pll(&rcc_hsi_configs[RCC_CLOCK_3V3_96MHZ]);
+
 	rcc_periph_clock_enable(RCC_GPIOC);
 	gpio_mode_setup(
 		GPIOC,
