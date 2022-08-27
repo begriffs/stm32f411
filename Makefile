@@ -7,47 +7,44 @@ OBJCOPY = $(ABI)-objcopy
 
 OPENCM3 = /usr/local/libopencm3-1.0.0
 RTOS = /usr/local/freertos-202012.04
-RTOS_PORT = $(RTOS)/portable/GCC/ARM_CM4F
 
-INC_RTOS = -I./rtos -I$(RTOS)/include -I$(RTOS_PORT)
-INC_OPENCM3 = -I$(OPENCM3)/include
+INC_RTOS = -I$(RTOS)/include -I$(RTOS)/portable/GCC/ARM_CM4F
+INC_OPENCM3 = -DSTM32F4 -I$(OPENCM3)/include
 
-# copy floating point flags from stm32/f4 in libopencm3 makefile
-FP_FLAGS = -mfloat-abi=hard -mfpu=fpv4-sp-d16
-
-STMF411 = -mcpu=cortex-m4 -mthumb $(FP_FLAGS) -DSTM32F4
+# copied x-compiler flags from libopencm3's stm32/f4 makefile
+STMF411 = -mcpu=cortex-m4 -mthumb \
+		  -mfloat-abi=hard -mfpu=fpv4-sp-d16
 
 CFLAGS = -std=c99 -pedantic -Wall -Wextra -Wshadow \
-         -g -Os $(STMF411) $(INC_RTOS) $(INC_OPENCM3)
+         -g -Os $(STMF411) -I. $(INC_RTOS) $(INC_OPENCM3)
 
-LDFLAGS = -Lrtos -L$(OPENCM3)/lib -L/usr/local/arm-none-eabi/lib/fpu \
-		  -nostartfiles -nostdlib \
+LDFLAGS = -nostartfiles -nostdlib \
+		  -L. -L$(OPENCM3)/lib -L/usr/local/$(ABI)/lib/fpu \
 		  -Tblackpill.ld
+
 LDLIBS = -lopencm3_stm32f4 -lfreertos -lg
 
-blink.axf blink.bin : blink.c rtos/libfreertos.a blackpill.ld
+## Programs ##########################################
+
+blink.axf blink.bin : blink.c libfreertos.a blackpill.ld
 	$(CC) $(CFLAGS) blink.c $(LDFLAGS) -o blink.axf $(LDLIBS)
 	$(OBJCOPY) -O binary blink.axf blink.bin
 
-miniblink.axf miniblink.bin : miniblink.c blackpill.ld
-	$(CC) $(CFLAGS) miniblink.c $(LDFLAGS) -o miniblink.axf $(LDLIBS)
-	$(OBJCOPY) -O binary miniblink.axf miniblink.bin
+## FreeRTOS ##########################################
 
-clean :
-	rm -f *.axf *.bin
-	rm -f rtos/*.[ao]
+RTOS_SRCS = croutine.c event_groups.c list.c \
+		    queue.c stream_buffer.c tasks.c \
+		    timers.c port.c heap_4.c
+RTOS_OBJS = $(RTOS_SRCS:.c=.o)
 
-#### Build FreeRTOS customized for our app config and target MCU
+VPATH = $(RTOS):$(RTOS)/portable/GCC/ARM_CM4F:$(RTOS)/portable/MemMang
 
-## TODO: is there a non-GNU way to simplify the repetition?
-
-rtos/libfreertos.a : rtos/tasks.o rtos/port.o rtos/list.o rtos/heap.o
+$(RTOS_OBJS) : FreeRTOSConfig.h
+libfreertos.a : $(RTOS_OBJS)
 	$(AR) r $@ $?
-rtos/tasks.o : $(RTOS)/tasks.c rtos/FreeRTOSConfig.h
-	$(CC) $(CFLAGS) -o $@ -c $(RTOS)/tasks.c
-rtos/list.o : $(RTOS)/list.c rtos/FreeRTOSConfig.h
-	$(CC) $(CFLAGS) -o $@ -c $(RTOS)/list.c
-rtos/port.o : $(RTOS_PORT)/port.c rtos/FreeRTOSConfig.h
-	$(CC) $(CFLAGS) -o $@ -c $(RTOS_PORT)/port.c
-rtos/heap.o : $(RTOS)/portable/MemMang/heap_4.c rtos/FreeRTOSConfig.h
-	$(CC) $(CFLAGS) -o $@ -c $(RTOS)/portable/MemMang/heap_4.c
+
+######################################################
+
+.PHONY:
+clean :
+	rm -f *.axf *.bin *.[ao]

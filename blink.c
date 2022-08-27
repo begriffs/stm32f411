@@ -36,8 +36,7 @@ int main(void)
 
 	xTaskCreate(
 		blink, "LED", 100, NULL, configMAX_PRIORITIES-1, NULL);
-	vTaskStartScheduler();
 
-	while (1)
-		;
+	vTaskStartScheduler(); // FreeRTOS, take the wheel!
+	configASSERT(0); // shouldn't get here
 }
