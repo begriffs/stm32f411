@@ -4,15 +4,6 @@
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
 
-void vApplicationStackOverflowHook(
-	TaskHandle_t task, char *name)
-{
-	(void)task;
-	(void)name;
-	while (1)
-		;
-}
-
 static void blink(void *args)
 {
 	(void)args;

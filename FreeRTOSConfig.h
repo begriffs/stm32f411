@@ -5,9 +5,6 @@
 	// turn assertion failures into uninterrupted loops that we can pause
 	// and look at in the debugger
 	#define configASSERT( x ) if( ( x ) == 0 ) { taskDISABLE_INTERRUPTS(); for(;;); }
-
-	// sounds nice
-	#define configCHECK_FOR_STACK_OVERFLOW  1
 #endif
 
 // we use this to delay blinks
