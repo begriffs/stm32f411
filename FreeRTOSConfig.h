@@ -18,6 +18,13 @@
 // uses, so let's just say 64k for now
 #define configTOTAL_HEAP_SIZE           (64 * 1024)
 
+// we'll use FreeRTOS with newlib for the C standard library,
+// so be safe: https://nadler.com/embedded/newlibAndFreeRTOS.html
+#define configUSE_NEWLIB_REENTRANT      1
+// required for heap_useNewlib_ST.c
+#define configISR_STACK_SIZE_WORDS      0x100
+#define INCLUDE_xTaskGetSchedulerState  1
+
 #define configUSE_PREEMPTION            1
 #define configUSE_IDLE_HOOK             0
 #define configUSE_TICK_HOOK             0

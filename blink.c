@@ -4,14 +4,26 @@
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
 
+#include <derp/vector.h>
+
+#define ARRAY_LEN(a) (sizeof(a)/sizeof(*a))
+
 static void blink(void *args)
 {
 	(void)args;
+
+	vector *v = v_new();
+	int ivals[] =  {0,1,2,3,4,5,6,7,8,9};
+
+	for (size_t i = 0; i < ARRAY_LEN(ivals); i++)
+		v_prepend(v, ivals+i);
+
 	while (1)
 	{
 		gpio_toggle(GPIOC, GPIO13);
-		vTaskDelay(pdMS_TO_TICKS(500));
+		vTaskDelay(pdMS_TO_TICKS(100 * v_length(v)));
 	}
+	v_free(v);
 }
 
 int main(void)
