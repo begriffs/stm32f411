@@ -26,7 +26,7 @@ LDFLAGS = -nostartfiles -nostdlib \
 		  -L$(DERP)/build/release \
           -Tblackpill.ld
 
-LDLIBS = -lopencm3_stm32f4 -lfreertos -lderp -lg
+LDLIBS = -lopencm3_stm32f4 -lderp -lfreertos -lg -lgcc
 
 ## Programs ##########################################
 

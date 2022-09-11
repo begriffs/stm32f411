@@ -24,6 +24,7 @@
 // required for heap_useNewlib_ST.c
 #define configISR_STACK_SIZE_WORDS      0x100
 #define INCLUDE_xTaskGetSchedulerState  1
+#undef  STM_VERSION
 
 #define configUSE_PREEMPTION            1
 #define configUSE_IDLE_HOOK             0
