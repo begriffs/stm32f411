@@ -30,15 +30,9 @@ LDLIBS = -lopencm3_stm32f4 -lfreertos_posix -lfreertos -lg
 
 ## Programs ##########################################
 
-all : blink.axf uart.axf
-
 blink.axf blink.bin : blink.c libfreertos.a blackpill.ld
 	$(CC) $(CFLAGS) blink.c $(LDFLAGS) -o blink.axf $(LDLIBS)
 	$(OBJCOPY) -O binary blink.axf blink.bin
-	
-uart.axf uart.bin : uart.c libfreertos.a libfreertos_posix.a blackpill.ld
-	$(CC) $(CFLAGS) uart.c $(LDFLAGS) -o uart.axf $(LDLIBS)
-	$(OBJCOPY) -O binary uart.axf uart.bin
 
 uart.axf uart.bin : uart.c libfreertos.a blackpill.ld
 	$(CC) $(CFLAGS) uart.c $(LDFLAGS) -o uart.axf $(LDLIBS)
