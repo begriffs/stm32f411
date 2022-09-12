@@ -22,6 +22,7 @@ CFLAGS = -Wall -Wextra -Wshadow \
 		 $(INC_DERP)
 
 LDFLAGS = -nostartfiles -nostdlib \
+		  -Xlinker --wrap=malloc -Xlinker --wrap=_malloc_r \
           -L. -L$(OPENCM3)/lib -L/usr/local/$(ABI)/lib/fpu \
 		  -L$(DERP)/build/release \
           -Tblackpill.ld
