@@ -39,7 +39,7 @@ blink.axf blink.bin : blink.c libfreertos.a blackpill.ld
 
 RTOS_SRCS = croutine.c event_groups.c list.c \
             queue.c stream_buffer.c tasks.c \
-            timers.c port.c heap_useNewlib_ST.c
+            timers.c port.c heap_useNewlib_NXP.c
 RTOS_OBJS = $(RTOS_SRCS:.c=.o)
 
 VPATH = $(RTOS):$(RTOS)/portable/GCC/ARM_CM4F:$(RTOS)/portable/MemMang

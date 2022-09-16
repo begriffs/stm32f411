@@ -7,10 +7,10 @@ MEMORY
 }
 
 /* for heap_useNewlib_ST.c */
-PROVIDE(__HeapBase  = ORIGIN(rom)              );
-PROVIDE(__HeapLimit = ORIGIN(rom) + LENGTH(rom));
-PROVIDE(__heap_size =               LENGTH(rom));
-PROVIDE(HEAP_SIZE   =               LENGTH(rom));
+PROVIDE(__HeapBase  = ORIGIN(ram)              );
+PROVIDE(__HeapLimit = ORIGIN(ram) + LENGTH(ram));
+PROVIDE(__heap_size =               LENGTH(ram));
+PROVIDE(HEAP_SIZE   =               LENGTH(ram));
 
 /* provided by libopencm3 */
 INCLUDE cortex-m-generic.ld
