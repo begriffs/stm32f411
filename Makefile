@@ -15,7 +15,7 @@ INC_OPENCM3 = -DSTM32F4 -I$(OPENCM3)/include
 STMF411 = -mcpu=cortex-m4 -mthumb \
           -mfloat-abi=hard -mfpu=fpv4-sp-d16
 
-CFLAGS = -std=c99 -pedantic -Wall -Wextra -Wshadow \
+CFLAGS = -std=c99 -pedantic -Wall -Wextra -Wshadow -fno-builtin-printf \
          -g -Os $(STMF411) -I. $(INC_RTOS) $(INC_OPENCM3)
 
 LDFLAGS = -nostartfiles -nostdlib \

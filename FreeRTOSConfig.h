@@ -1,6 +1,13 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
+// Protect against newlib functions that use dynamic memory.
+// Newlib malloc() and pvPortAlloc() do not mix.
+#pragma GCC poison \
+	malloc calloc realloc free \
+	fread funopen setvbuf printf scanf tmpnam ungetc \
+	strftime strdup
+
 #ifndef NDEBUG
 	// turn assertion failures into uninterrupted loops that we can pause
 	// and look at in the debugger
