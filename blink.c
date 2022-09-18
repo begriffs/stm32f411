@@ -8,6 +8,13 @@
 
 #define ARRAY_LEN(a) (sizeof(a)/sizeof(*a))
 
+void vApplicationStackOverflowHook(TaskHandle_t task, char *name)
+{
+	(void)task;
+	(void)name;
+	for (;;);
+}
+
 static void blink(void *args)
 {
 	(void)args;
@@ -21,7 +28,7 @@ static void blink(void *args)
 	while (1)
 	{
 		gpio_toggle(GPIOC, GPIO13);
-		vTaskDelay(pdMS_TO_TICKS(100 * v_length(v)));
+		vTaskDelay(pdMS_TO_TICKS(10 * v_length(v)));
 	}
 	v_free(v);
 }

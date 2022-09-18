@@ -5,24 +5,21 @@
 	// turn assertion failures into uninterrupted loops that we can pause
 	// and look at in the debugger
 	#define configASSERT( x ) if( ( x ) == 0 ) { taskDISABLE_INTERRUPTS(); for(;;); }
+
+	#define configCHECK_FOR_STACK_OVERFLOW 2
 #endif
 
 // we use this to delay blinks
 #define INCLUDE_vTaskDelay              1
 
-// IDK, but copied from most similar demo, CORTEX_M4F_STM32F407ZG-SK.
-// Many other demos use 128, so should be safe.
+// Size of stack used for the idle task. I don't know the correct value for
+// this. I copied the value from the most similar RTOS demo project,
+// CORTEX_M4F_STM32F407ZG-SK.  Many other demos use 128, so should be safe.
 #define configMINIMAL_STACK_SIZE        130
 
-// the device has 128k of SRAM, and I don't know how much the kernel
-// uses, so let's just say 64k for now
-#define configTOTAL_HEAP_SIZE           (64 * 1024)
-
-// we'll use FreeRTOS with newlib for the C standard library,
-// so be safe: https://nadler.com/embedded/newlibAndFreeRTOS.html
+// We'll use FreeRTOS with newlib malloc, so be safe:
+// https://nadler.com/embedded/newlibAndFreeRTOS.html
 #define configUSE_NEWLIB_REENTRANT      1
-// required for heap_useNewlib_NXP.c
-#define configISR_STACK_SIZE_WORDS      0x100
 
 #define configUSE_PREEMPTION            1
 #define configUSE_IDLE_HOOK             0
@@ -84,6 +81,5 @@
 #define vPortSVCHandler sv_call_handler
 #define xPortPendSVHandler pend_sv_handler
 #define xPortSysTickHandler sys_tick_handler
-
 
 #endif
