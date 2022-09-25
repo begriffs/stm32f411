@@ -71,7 +71,7 @@ void gpio_setup(void)
 	gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO9);
 
 	// Setup USART1 TX pin as alternate function
-	gpio_set_af(GPIOA, GPIO_AF9, GPIO9);
+	gpio_set_af(GPIOA, GPIO_AF7, GPIO9);
 }
 
 int main(void)
