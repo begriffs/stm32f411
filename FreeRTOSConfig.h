@@ -36,7 +36,7 @@
 // Up to us, not mandated by the device. Sets the smallest granularity
 // of time that pdMS_TO_TICKS can specify. Need at least 1khz to get
 // single-ms control
-#define configTICK_RATE_HZ              1e3
+#define configTICK_RATE_HZ              1000
 
 // we're not on a restrictive 8- or 16-bit chip
 #define configUSE_16_BIT_TICKS          0
