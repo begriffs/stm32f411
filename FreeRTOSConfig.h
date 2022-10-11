@@ -50,6 +50,11 @@
 // seems fine.
 #define configMAX_TASK_NAME_LEN         16
 
+// Required for FreeRTOS+POSIX as mentioned in
+// https://freertos.org/FreeRTOS-Plus/FreeRTOS_Plus_POSIX/index.html#dependencies
+#define configUSE_POSIX_ERRNO           1
+#define configUSE_APPLICATION_TASK_TAG  1
+
 /********* Cortex-M specific magic **********
  *
  * As advised by question 1 in
