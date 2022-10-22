@@ -20,6 +20,7 @@ CFLAGS = -std=c99 -pedantic -Wall -Wextra -Wshadow -fno-builtin-printf \
 
 LDFLAGS = -nostartfiles -nostdlib \
           -L. -L$(OPENCM3)/lib -L/usr/local/$(ABI)/lib/fpu \
+		  -Wl,--print-memory-usage \
           -Tblackpill.ld
 
 LDLIBS = -lopencm3_stm32f4 -lfreertos -lg
@@ -40,10 +41,10 @@ uart.axf uart.bin : uart.c libfreertos.a blackpill.ld
 
 RTOS_SRCS = croutine.c event_groups.c list.c \
             queue.c stream_buffer.c tasks.c \
-            timers.c port.c heap_4.c
+            timers.c port.c systask_static_mem.c
 RTOS_OBJS = $(RTOS_SRCS:.c=.o)
 
-VPATH = $(RTOS):$(RTOS)/portable/GCC/ARM_CM4F:$(RTOS)/portable/MemMang
+VPATH = $(RTOS):$(RTOS)/portable/GCC/ARM_CM4F
 
 $(RTOS_OBJS) : FreeRTOSConfig.h
 libfreertos.a : $(RTOS_OBJS)

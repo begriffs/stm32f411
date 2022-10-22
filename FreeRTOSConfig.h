@@ -21,9 +21,10 @@
 // Many other demos use 128, so should be safe.
 #define configMINIMAL_STACK_SIZE        130
 
-// the device has 128k of SRAM, and I don't know how much the kernel
-// uses, so let's just say 64k for now
-#define configTOTAL_HEAP_SIZE           (64 * 1024)
+// MIS(e)RA(ble)
+#define configSUPPORT_DYNAMIC_ALLOCATION 0
+#define configSUPPORT_STATIC_ALLOCATION  1
+
 
 #define configUSE_PREEMPTION            1
 #define configUSE_IDLE_HOOK             0

@@ -5,6 +5,9 @@
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/usart.h>
 
+StaticTask_t taskBuf;
+StackType_t  taskStack[configMINIMAL_STACK_SIZE];
+
 void stream_chars(void *args)
 {
 	(void)args;
@@ -80,9 +83,9 @@ int main(void)
 	gpio_setup();
 	usart_setup();
 
-	xTaskCreate(
-		stream_chars, "UART", 100, NULL,
-		configMAX_PRIORITIES-1, NULL);
+	xTaskCreateStatic(
+		stream_chars, "UART", configMINIMAL_STACK_SIZE, NULL,
+		configMAX_PRIORITIES-1, taskStack, &taskBuf);
 
 	vTaskStartScheduler(); // FreeRTOS, take the wheel!
 	configASSERT(0); // shouldn't get here
