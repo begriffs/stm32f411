@@ -16,7 +16,7 @@ void app(void *args)
 		gpio_toggle(GPIOC, GPIO13);	/* LED on/off */
 		usart_send_blocking(USART1, c + '0'); /* USART1: Send byte. */
 		c = (c+1)%10;
-		if ((j++ % 80) == 0)
+		if ((j++ % 20) == 0)
 		{
 			/* Newline after line full. */
 			usart_send_blocking(USART1, '\r');
