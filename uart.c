@@ -5,10 +5,7 @@
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/usart.h>
 
-StaticTask_t taskBuf;
-StackType_t  taskStack[configMINIMAL_STACK_SIZE];
-
-void stream_chars(void *args)
+void app(void *args)
 {
 	(void)args;
 
@@ -31,21 +28,16 @@ void stream_chars(void *args)
 
 void clock_setup(void)
 {
-	// main system clock, go faster than necessary
 	rcc_clock_setup_pll(&rcc_hsi_configs[RCC_CLOCK_3V3_96MHZ]);
 
-	// GPIO clock for USART1
-	rcc_periph_clock_enable(RCC_GPIOA);
-	// and LED
-	rcc_periph_clock_enable(RCC_GPIOC);
+	rcc_periph_clock_enable(RCC_GPIOA);  // for USART1
+	rcc_periph_clock_enable(RCC_GPIOC);  // for LED
 
-	// then for USART1 directly for some reason
-	rcc_periph_clock_enable(RCC_USART1);
+	rcc_periph_clock_enable(RCC_USART1); // USART1 in particular
 }
 
 void usart_setup(void)
 {
-	// serial params
 	usart_set_baudrate(USART1, 38400);
 	usart_set_databits(USART1, 8);
 	usart_set_stopbits(USART1, USART_STOPBITS_1);
@@ -83,9 +75,12 @@ int main(void)
 	gpio_setup();
 	usart_setup();
 
+	StaticTask_t appTaskBuf;
+	StackType_t  appTaskStack[configMINIMAL_STACK_SIZE];
+
 	xTaskCreateStatic(
-		stream_chars, "UART", configMINIMAL_STACK_SIZE, NULL,
-		configMAX_PRIORITIES-1, taskStack, &taskBuf);
+		app, "app", configMINIMAL_STACK_SIZE, NULL,
+		configMAX_PRIORITIES-1, appTaskStack, &appTaskBuf);
 
 	vTaskStartScheduler(); // FreeRTOS, take the wheel!
 	configASSERT(0); // shouldn't get here

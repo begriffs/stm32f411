@@ -4,10 +4,7 @@
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
 
-StaticTask_t taskBuf;
-StackType_t  taskStack[configMINIMAL_STACK_SIZE];
-
-void blink(void *args)
+void app(void *args)
 {
 	(void)args;
 	while (1)
@@ -19,6 +16,9 @@ void blink(void *args)
 
 int main(void)
 {
+	StaticTask_t appTaskBuf;
+	StackType_t  appTaskStack[configMINIMAL_STACK_SIZE];
+
 	rcc_clock_setup_pll(&rcc_hsi_configs[RCC_CLOCK_3V3_96MHZ]);
 
 	rcc_periph_clock_enable(RCC_GPIOC);
@@ -29,8 +29,8 @@ int main(void)
 		GPIO13);
 
 	xTaskCreateStatic(
-		blink, "LED", configMINIMAL_STACK_SIZE, NULL,
-		configMAX_PRIORITIES-1, taskStack, &taskBuf);
+		app, "app", configMINIMAL_STACK_SIZE, NULL,
+		configMAX_PRIORITIES-1, appTaskStack, &appTaskBuf);
 
 	vTaskStartScheduler(); // FreeRTOS, take the wheel!
 	configASSERT(0); // shouldn't get here
