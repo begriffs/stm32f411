@@ -69,14 +69,14 @@ void gpio_setup(void)
 	gpio_set_af(GPIOA, GPIO_AF7, GPIO9);
 }
 
+StaticTask_t appTaskBuf;
+StackType_t  appTaskStack[configMINIMAL_STACK_SIZE];
+
 int main(void)
 {
 	clock_setup();
 	gpio_setup();
 	usart_setup();
-
-	StaticTask_t appTaskBuf;
-	StackType_t  appTaskStack[configMINIMAL_STACK_SIZE];
 
 	xTaskCreateStatic(
 		app, "app", configMINIMAL_STACK_SIZE, NULL,

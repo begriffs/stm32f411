@@ -14,11 +14,11 @@ void app(void *args)
 	}
 }
 
+StaticTask_t appTaskBuf;
+StackType_t  appTaskStack[configMINIMAL_STACK_SIZE];
+
 int main(void)
 {
-	StaticTask_t appTaskBuf;
-	StackType_t  appTaskStack[configMINIMAL_STACK_SIZE];
-
 	rcc_clock_setup_pll(&rcc_hsi_configs[RCC_CLOCK_3V3_96MHZ]);
 
 	rcc_periph_clock_enable(RCC_GPIOC);
