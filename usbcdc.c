@@ -9,9 +9,11 @@
 #include <libopencm3/usb/usbd.h>
 #include <libopencm3/usb/cdc.h>
 
+#include <libopencm3/usb/dwc/otg_fs.h> // for OTG_FS_GCCFG
+
 /**** USB DESCRIPTORS ***********************************/
 
-const struct usb_device_descriptor dev = {
+static const struct usb_device_descriptor dev = {
 	.bLength = USB_DT_DEVICE_SIZE,
 	.bDescriptorType = USB_DT_DEVICE,
 	.bcdUSB = 0x0200,
@@ -28,25 +30,37 @@ const struct usb_device_descriptor dev = {
 	.bNumConfigurations = 1,
 };
 
-const struct usb_endpoint_descriptor data_endp[] = {
-	{
-		.bLength = USB_DT_ENDPOINT_SIZE,
+/*
+ * This notification endpoint isn't implemented. According to CDC spec it's
+ * optional, but its absence causes a NULL pointer dereference in the
+ * Linux cdc_acm driver.
+ */
+static const struct usb_endpoint_descriptor comm_endp[] = {{
+	.bLength = USB_DT_ENDPOINT_SIZE,
+		.bDescriptorType = USB_DT_ENDPOINT,
+		.bEndpointAddress = 0x83,
+		.bmAttributes = USB_ENDPOINT_ATTR_INTERRUPT,
+		.wMaxPacketSize = 16,
+		.bInterval = 255,
+} };
+
+static const struct usb_endpoint_descriptor data_endp[] = {{
+	.bLength = USB_DT_ENDPOINT_SIZE,
 		.bDescriptorType = USB_DT_ENDPOINT,
 		.bEndpointAddress = 0x01,
 		.bmAttributes = USB_ENDPOINT_ATTR_BULK,
 		.wMaxPacketSize = 64,
 		.bInterval = 1,
-	}, {
-		.bLength = USB_DT_ENDPOINT_SIZE,
+}, {
+	.bLength = USB_DT_ENDPOINT_SIZE,
 		.bDescriptorType = USB_DT_ENDPOINT,
 		.bEndpointAddress = 0x82,
 		.bmAttributes = USB_ENDPOINT_ATTR_BULK,
 		.wMaxPacketSize = 64,
 		.bInterval = 1,
-	}
-};
+} };
 
-const struct {
+static const struct {
 	struct usb_cdc_header_descriptor header;
 	struct usb_cdc_call_management_descriptor call_mgmt;
 	struct usb_cdc_acm_descriptor acm;
@@ -81,9 +95,25 @@ const struct {
 	}
 };
 
-const struct usb_interface_descriptor data_iface[] = {
-	{
-		.bLength = USB_DT_INTERFACE_SIZE,
+static const struct usb_interface_descriptor comm_iface[] = {{
+	.bLength = USB_DT_INTERFACE_SIZE,
+		.bDescriptorType = USB_DT_INTERFACE,
+		.bInterfaceNumber = 0,
+		.bAlternateSetting = 0,
+		.bNumEndpoints = 1,
+		.bInterfaceClass = USB_CLASS_CDC,
+		.bInterfaceSubClass = USB_CDC_SUBCLASS_ACM,
+		.bInterfaceProtocol = USB_CDC_PROTOCOL_AT,
+		.iInterface = 0,
+
+		.endpoint = comm_endp,
+
+		.extra = &cdcacm_functional_descriptors,
+		.extralen = sizeof(cdcacm_functional_descriptors)
+} };
+
+static const struct usb_interface_descriptor data_iface[] = {{
+	.bLength = USB_DT_INTERFACE_SIZE,
 		.bDescriptorType = USB_DT_INTERFACE,
 		.bInterfaceNumber = 1,
 		.bAlternateSetting = 0,
@@ -92,35 +122,38 @@ const struct usb_interface_descriptor data_iface[] = {
 		.bInterfaceSubClass = 0,
 		.bInterfaceProtocol = 0,
 		.iInterface = 0,
+
 		.endpoint = data_endp,
-	}
-};
+} };
 
-const struct usb_interface ifaces[] = {
-	{
-		.num_altsetting = 1,
+static const struct usb_interface ifaces[] = {{
+	.num_altsetting = 1,
+		.altsetting = comm_iface,
+}, {
+	.num_altsetting = 1,
 		.altsetting = data_iface,
-	}
-};
+} };
 
-const struct usb_config_descriptor config = {
+static const struct usb_config_descriptor config = {
 	.bLength = USB_DT_CONFIGURATION_SIZE,
 	.bDescriptorType = USB_DT_CONFIGURATION,
 	.wTotalLength = 0,
-	.bNumInterfaces = 1,
+	.bNumInterfaces = 2,
 	.bConfigurationValue = 1,
 	.iConfiguration = 0,
 	.bmAttributes = 0x80,
 	.bMaxPower = 0x32,
+
 	.interface = ifaces,
 };
 
 static const char * usb_strings[] = {
-	"usbcdc.c driver",
-	"usbcdc module",
-	"usbcdcdemo",
+	"Black Sphere Technologies",
+	"CDC-ACM Demo",
+	"DEMO",
 };
 
+/* Buffer to be used for control requests. */
 uint8_t usbd_control_buffer[128];
 
 /**** CALLBACKS *****************************************/
@@ -140,6 +173,13 @@ cdcacm_control_request(
 
 	switch (req->bRequest)
 	{
+	case USB_CDC_REQ_SET_CONTROL_LINE_STATE:
+		/*
+		 * This Linux cdc_acm driver requires this to be implemented
+		 * even though it's optional in the CDC spec, and we don't
+		 * advertise it in the ACM functional descriptor.
+		 */
+		return USBD_REQ_HANDLED;
 	case USB_CDC_REQ_SET_LINE_CODING:
 		return *len >= sizeof *req
 			? USBD_REQ_HANDLED
@@ -269,6 +309,8 @@ void usb_start(void)
 
 	rcc_periph_clock_enable(RCC_GPIOA);
 	rcc_periph_clock_enable(RCC_OTGFS);
+	gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO11 | GPIO12);
+	gpio_set_af(GPIOA, GPIO_AF10, GPIO11 | GPIO12);
 
 	udev = usbd_init(
 		&otgfs_usb_driver,
@@ -276,9 +318,13 @@ void usb_start(void)
 		usbd_control_buffer,
 		sizeof usbd_control_buffer);
 
+	// https://github.com/libopencm3/libopencm3/pull/1256
+	OTG_FS_GCCFG |= OTG_GCCFG_NOVBUSSENS | OTG_GCCFG_PWRDWN;
+	OTG_FS_GCCFG &= ~(OTG_GCCFG_VBUSBSEN | OTG_GCCFG_VBUSASEN);
+
 	usbd_register_set_config_callback(udev, cdcacm_set_config);
 	xTaskCreateStatic(
-		usb_task, "USBTX", configMINIMAL_STACK_SIZE, NULL,
+		usb_task, "USB", configMINIMAL_STACK_SIZE, NULL,
 		configMAX_PRIORITIES-1, usbTaskStack, &usbTaskBuf);
 }
 
@@ -286,7 +332,8 @@ void usb_start(void)
 
 int main(void)
 {
-	rcc_clock_setup_pll(&rcc_hsi_configs[RCC_CLOCK_3V3_96MHZ]);
+	//rcc_clock_setup_pll(&rcc_hsi_configs[RCC_CLOCK_3V3_96MHZ]);
+	rcc_clock_setup_pll(&rcc_hse_25mhz_3v3[RCC_CLOCK_3V3_84MHZ]);
 	usb_start();
 
 	xTaskCreateStatic(

@@ -27,7 +27,7 @@ LDLIBS = -lopencm3_stm32f4 -lfreertos -lg
 
 ## Programs ##########################################
 
-all : blink.axf uart.axf usbcdc.axf
+all : blink.axf uart.axf usbcdc.axf cdcacm.axf
 
 blink.axf blink.bin : blink.c libfreertos.a blackpill.ld
 	$(CC) $(CFLAGS) blink.c $(LDFLAGS) -o blink.axf $(LDLIBS)
@@ -40,6 +40,10 @@ uart.axf uart.bin : uart.c libfreertos.a blackpill.ld
 usbcdc.axf usbcdc.bin : usbcdc.c libfreertos.a blackpill.ld
 	$(CC) $(CFLAGS) usbcdc.c $(LDFLAGS) -o usbcdc.axf $(LDLIBS)
 	$(OBJCOPY) -O binary usbcdc.axf usbcdc.bin
+
+cdcacm.axf cdcacm.bin : cdcacm.c libfreertos.a blackpill.ld
+	$(CC) $(CFLAGS) cdcacm.c $(LDFLAGS) -o cdcacm.axf $(LDLIBS)
+	$(OBJCOPY) -O binary cdcacm.axf cdcacm.bin
 
 ## FreeRTOS ##########################################
 
