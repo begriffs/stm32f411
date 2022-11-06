@@ -30,8 +30,10 @@
 #define configUSE_IDLE_HOOK             0
 #define configUSE_TICK_HOOK             0
 
-// up to us to clock the chip to match using libopencm3
-#define configCPU_CLOCK_HZ              96000000
+// let the application inform us what clock speed it set with libopencm3
+#include <stdint.h>
+extern uint32_t SystemCoreClock;
+#define configCPU_CLOCK_HZ              (SystemCoreClock)
 
 // Up to us, not mandated by the device. Sets the smallest granularity
 // of time that pdMS_TO_TICKS can specify. Need at least 1khz to get

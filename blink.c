@@ -4,6 +4,8 @@
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
 
+uint32_t SystemCoreClock;
+
 void app(void *args)
 {
 	(void)args;
@@ -20,6 +22,7 @@ StackType_t  appTaskStack[configMINIMAL_STACK_SIZE];
 int main(void)
 {
 	rcc_clock_setup_pll(&rcc_hsi_configs[RCC_CLOCK_3V3_96MHZ]);
+	SystemCoreClock = 96000000;
 
 	rcc_periph_clock_enable(RCC_GPIOC);
 	gpio_mode_setup(

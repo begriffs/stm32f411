@@ -330,10 +330,13 @@ void usb_start(void)
 
 /**** ENTRYPOINT ****************************************/
 
+uint32_t SystemCoreClock;
 int main(void)
 {
 	//rcc_clock_setup_pll(&rcc_hsi_configs[RCC_CLOCK_3V3_96MHZ]);
 	rcc_clock_setup_pll(&rcc_hse_25mhz_3v3[RCC_CLOCK_3V3_84MHZ]);
+	SystemCoreClock = 96000000;
+
 	usb_start();
 
 	xTaskCreateStatic(

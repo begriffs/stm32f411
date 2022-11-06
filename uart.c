@@ -26,9 +26,12 @@ void app(void *args)
 	}
 }
 
+uint32_t SystemCoreClock;
+
 void clock_setup(void)
 {
 	rcc_clock_setup_pll(&rcc_hsi_configs[RCC_CLOCK_3V3_96MHZ]);
+	SystemCoreClock = 96000000;
 
 	rcc_periph_clock_enable(RCC_GPIOA);  // for USART1
 	rcc_periph_clock_enable(RCC_GPIOC);  // for LED
