@@ -1,1 +1,2 @@
-doas openocd -f jlink-blackpill.cfg -c "program $1 0x8000000 exit"
+# doas openocd -f jlink-blackpill.cfg -c "program $1 0x8000000 exit"
+doas openocd -f nucleo.cfg -c "program $1 0x8000000 exit"
